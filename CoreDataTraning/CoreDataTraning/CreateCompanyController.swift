@@ -10,13 +10,20 @@ import UIKit
 import CoreData
 
 // Custom Delegation
-protocol CreateConpmayControllerDelegate {
+protocol CreateCompanyControllerDelegate {
     func didAddCompany(company: Company)
+    func didEditCompany(company: Company)
 }
 
 class CreateCompanyController: UIViewController {
     
-    var delegate: CreateConpmayControllerDelegate?
+    var company: Company? {
+        didSet {
+            nameTextField.text = company?.name
+        }
+    }
+    
+    var delegate: CreateCompanyControllerDelegate?
     
     let nameLabel: UILabel = {
         let label = UILabel()
@@ -34,12 +41,16 @@ class CreateCompanyController: UIViewController {
         return textField
     }()
     
+    override func viewWillAppear(_ animated: Bool) {
+        super .viewWillAppear(animated)
+        
+        navigationItem.title = company == nil ? "Create Company" : "Edit Company"
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupUI()
-        
-        navigationItem.title = "Create Company"
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(handleSave))
@@ -76,17 +87,39 @@ class CreateCompanyController: UIViewController {
     }
     
     @objc func handleSave() {
-        print("save")
+        if company == nil {
+            createCompany()
+        } else {
+            saveCompanyChanges()
+        }
+    }
+    
+    private func saveCompanyChanges() {
+        let context = CoreDataManager.shared.persistentContainer.viewContext
         
+        company?.name = nameTextField.text
+        do {
+            try context.save()
+            //success
+            dismiss(animated: true, completion: {
+                self.delegate?.didEditCompany(company: self.company!)
+            })
+        } catch let saveErr {
+            print("Failed to save company Changes:", saveErr)
+        }
+    }
+    
+    private func createCompany() {
+        print("save")
+    
         let context =  CoreDataManager.shared.persistentContainer.viewContext
         let company = NSEntityDescription.insertNewObject(forEntityName: "Company", into: context)
-        
+    
         company.setValue(nameTextField.text, forKey: "name")
-        
+    
         //perform save
         do {
             try context.save()
-            
             //success
             dismiss(animated: true) {
                 self.delegate?.didAddCompany(company: company as! Company)
