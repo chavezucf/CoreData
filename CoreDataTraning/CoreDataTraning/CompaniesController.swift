@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class CompaniesController: UITableViewController, CreateConpmayControllerDelegate{
     func didAddCompany(company: Company) {
@@ -15,13 +16,36 @@ class CompaniesController: UITableViewController, CreateConpmayControllerDelegat
         tableView.insertRows(at: [newIndexPath], with: .automatic)
     }
     
+    var companies = [Company]()
     
-    var companies = [Company(name: "Apple", founded: Date()),
-                     Company(name: "Google", founded: Date()),
-                     Company(name: "Amazon", founded: Date())
-    ]
+//    var companies = [Company(name: "Apple", founded: Date()),
+//                     Company(name: "Google", founded: Date()),
+//                     Company(name: "Amazon", founded: Date())
+//    ]
+    
+    private func fetchCompanies() {
+        //attempt my core data fetch somehow..
+        let context = CoreDataManager.shared.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<Company>(entityName: "Company")
+        
+        do {
+            let companies = try context.fetch(fetchRequest)
+            companies.forEach({ (company) in
+                print(company.name ?? "")
+            })
+            
+            self.companies = companies
+            self.tableView.reloadData()
+            
+        } catch let fetchErr {
+            print("Failed to fetch companies:", fetchErr)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        fetchCompanies()
         
         view.backgroundColor = .white
         
