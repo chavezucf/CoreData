@@ -14,10 +14,6 @@ class CompaniesController: UITableViewController{
     var companies = [Company]()
     
     @objc private func doWork() {
-        print("de work")
-        // GCD - Grand Central Dispatch
-        //DispatchQueue.global(qos: .background).async {
-        //}
         CoreDataManager.shared.persistentContainer.performBackgroundTask({ (backgroundContext) in
             
             (0...10).forEach { (value) in
@@ -28,8 +24,8 @@ class CompaniesController: UITableViewController{
             
             do {
                 try backgroundContext.save()
-                self.companies = CoreDataManager.shared.fetchCompanies()
                 DispatchQueue.main.async {
+                    self.companies = CoreDataManager.shared.fetchCompanies()
                     self.tableView.reloadData()
                 }
                 
@@ -72,15 +68,12 @@ class CompaniesController: UITableViewController{
         
         DispatchQueue.global(qos: .background).async {
             //we will try to perform our updates
-            
             // we will first contruct a custom MOC
-            
             let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
             
             privateContext.parent = CoreDataManager.shared.persistentContainer.viewContext
             
-            // excute updates on pricateContext noq
-            
+            // excute updates on pricateContext now
             let request: NSFetchRequest<Company> = Company.fetchRequest()
             request.fetchLimit = 1
             

@@ -34,24 +34,13 @@ extension CompaniesController {
             }
         }
         deleteAction.backgroundColor = .lightRed
-        let editAction = UITableViewRowAction(style: .normal, title: "Edit", handler: editHandlerFunction)
-        
+        let editAction = UITableViewRowAction(style: .normal, title: "Edit") { (_, indexPath) in
+            print("Edit ")
+        }
         editAction.backgroundColor = .darkBlue
         return[deleteAction, editAction]
     }
     
-    private func editHandlerFunction(action: UITableViewRowAction, indexPath: IndexPath) {
-        let company = self.companies[indexPath.row]
-        print("EDIT company:", company.name ?? "")
-        //perform edit
-        
-        let editCompanyController = CreateCompanyController()
-        editCompanyController.delegate = self
-        editCompanyController.company = companies[indexPath.row]
-        let navController = CustomNavigationController(rootViewController: editCompanyController)
-        present(navController, animated: true, completion: nil)
-        
-    }
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView()
